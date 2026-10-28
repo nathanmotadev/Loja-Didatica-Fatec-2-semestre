@@ -1,11 +1,12 @@
 /* GERADO AUTOMATICAMENTE a partir de ../carrinho.jsx pelo Babel (preset react).
-   fonte: carrinho.jsx sha256:e584e48d83c28db20bbea8dea3a88bbbeae3d2eba5b2069ca49407c4acd69247
+   fonte: carrinho.jsx sha256:9a2e9ba65b964d639737f80789052b74d2750872571fd065bb4d98706b6805e6
    Não edite este arquivo: edite o .jsx e recompile (node compilar_jsx.js) — ou
    simplesmente salve o .jsx: a página vê que o hash mudou e compila com o Babel. */
 /* =============================================================================
    <Carrinho/> — carrinho persistente do cliente.
-   GET api/carrinho | POST api/carrinho_atualizar | api/carrinho_remover |
-   api/carrinho_finalizar (cria o pedido e redireciona para a tela do PIX).
+   GET api/carrinho | POST api/carrinho_atualizar | api/carrinho_remover.
+   "Continuar" leva à tela cliente/entrega (endereço ou retirada na loja),
+   que cria o pedido e redireciona para o PIX.
    ============================================================================= */
 (() => {
   const {
@@ -100,19 +101,6 @@
       setOcupado(false);
       mostrarToast(item.nome + ' removido do carrinho.');
     }
-    async function finalizar() {
-      setOcupado(true);
-      const r = await LojaAPI.post('carrinho_finalizar', {});
-      if (r.ok) {
-        mostrarToast('Pedido criado. Abrindo o pagamento PIX…');
-        window.location = r.url_pix;
-      } else {
-        setErro(r.erro || 'Não foi possível finalizar.');
-        const atual = await LojaAPI.get('carrinho'); // estoque pode ter mudado
-        if (atual.ok) setCarrinho(atual.carrinho);
-        setOcupado(false);
-      }
-    }
     if (!carrinho) return /*#__PURE__*/React.createElement("p", {
       className: "carregando"
     }, "Carregando carrinho\u2026");
@@ -146,18 +134,20 @@
       className: "resumo-linha"
     }, /*#__PURE__*/React.createElement("span", null, "Itens"), /*#__PURE__*/React.createElement("span", null, carrinho.quantidade_total)), /*#__PURE__*/React.createElement("div", {
       className: "resumo-linha"
-    }, /*#__PURE__*/React.createElement("span", null, "Entrega"), /*#__PURE__*/React.createElement("span", null, "at\xE9 ", carrinho.prazo_dias, " dias \xFAteis")), /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("span", null, "Entrega"), /*#__PURE__*/React.createElement("span", null, "at\xE9 ", carrinho.prazo_dias, " dias \xFAteis ou retire na loja")), /*#__PURE__*/React.createElement("div", {
       className: "resumo-linha"
     }, /*#__PURE__*/React.createElement("span", null, "Frete"), /*#__PURE__*/React.createElement("span", null, "gr\xE1tis")), /*#__PURE__*/React.createElement("div", {
       className: "resumo-linha resumo-total"
     }, /*#__PURE__*/React.createElement("span", null, "Total"), /*#__PURE__*/React.createElement("span", {
       className: "preco"
-    }, carrinho.total_fmt)), /*#__PURE__*/React.createElement("button", {
+    }, carrinho.total_fmt)), ocupado || bloqueado ? /*#__PURE__*/React.createElement("button", {
       type: "button",
       className: "btn btn-primario btn-largo mt-1",
-      onClick: finalizar,
-      disabled: ocupado || bloqueado
-    }, ocupado ? 'Aguarde…' : 'Finalizar e pagar com PIX'), bloqueado && /*#__PURE__*/React.createElement("p", {
+      disabled: true
+    }, "Continuar para a entrega") : /*#__PURE__*/React.createElement("a", {
+      className: "btn btn-primario btn-largo mt-1",
+      href: LOJA.urls.entrega
+    }, "Continuar para a entrega"), bloqueado && /*#__PURE__*/React.createElement("p", {
       className: "pequeno texto-2 mt-1"
     }, "Ajuste os itens sem estoque antes de finalizar."), /*#__PURE__*/React.createElement("a", {
       className: "btn btn-discreto btn-largo mt-1",

@@ -12,7 +12,7 @@ def index():
         usuarios=db(db.auth_user).count(),
         pedidos=db(db.pedido).count(),
         aguardando=db(db.pedido.status == 'aguardando_pagamento').count(),
-        pagos=db(db.pedido.status.belongs(FLUXO_ENTREGA)).count(),
+        pagos=db(db.pedido.status.belongs(STATUS_PAGOS)).count(),
         cancelados=db(db.pedido.status == 'cancelado').count(),
         pix_pendentes=db(db.pagamento_pix.status.belongs(['gerado', 'informado'])).count(),
         reclamacoes_abertas=db(db.reclamacao.status == 'aberta').count(),
@@ -20,7 +20,7 @@ def index():
                                (db.mensagem.cancelada == False)).count(),
     )
     soma = db.pedido.total.sum()
-    n['faturado'] = db(db.pedido.status.belongs(FLUXO_ENTREGA)).select(soma).first()[soma] or 0
+    n['faturado'] = db(db.pedido.status.belongs(STATUS_PAGOS)).select(soma).first()[soma] or 0
     por_papel = dict((papel, 0) for papel in PAPEIS)
     cont = db.auth_membership.id.count()
     for r in db((db.auth_membership.group_id == db.auth_group.id)).select(

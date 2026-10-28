@@ -4,18 +4,19 @@
 <div class="cabecalho-pagina">
   <div><h1>Pedido <span class="mono">{{=pedido.codigo}}</span></h1>
   <p>{{=data_br(pedido.data_pedido)}} · {{=nome_usuario(cliente)}} {{if cliente:}}({{=cliente.email}}{{if cliente.telefone:}}, {{=cliente.telefone}}{{pass}}){{pass}} · rastreio <span class="mono">{{=pedido.codigo_rastreio}}</span></p></div>
-  <span class="etiqueta {{=pedido.status}}" style="font-size:.95rem">{{=rotulo_pedido(pedido.status)}}</span>
+  <span class="etiqueta {{=pedido.status}}" style="font-size:.95rem">{{=rotulo_etapa(pedido, pedido.status)}}</span>
 </div>
 
 <div class="grade grade-2">
   <div class="cartao">
-    <h2>Entrega</h2>
-    {{if pedido.status in FLUXO_ENTREGA:}}
+    <h2>{{=TIPO_ENTREGA_ROTULO.get(pedido.tipo_entrega)}}</h2>
+    <p class="texto-2">{{=texto_endereco(pedido)}}</p>
+    {{if pedido.status in fluxo_do_pedido(pedido):}}
     <form method="post" action="{{=URL('operador', 'pedido', args=[pedido.id])}}">
       <input type="hidden" name="_csrf" value="{{=csrf_token()}}">
       <div class="campo"><label for="status">Etapa atual</label>
         <select id="status" name="status">
-          {{for s in FLUXO_ENTREGA:}}<option value="{{=s}}" {{='selected' if s == pedido.status else ''}}>{{=rotulo_pedido(s)}}</option>{{pass}}
+          {{for s in fluxo_do_pedido(pedido):}}<option value="{{=s}}" {{='selected' if s == pedido.status else ''}}>{{=rotulo_etapa(pedido, s)}}</option>{{pass}}
         </select></div>
       <button class="btn btn-primario" type="submit" name="acao" value="status">Salvar etapa</button>
     </form>

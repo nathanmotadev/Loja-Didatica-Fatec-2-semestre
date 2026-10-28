@@ -92,10 +92,14 @@ def carrinho_remover():
 
 
 def carrinho_finalizar():
-    """Fecha o pedido; o React redireciona para url_pix."""
+    """Fecha o pedido com a forma de recebimento do corpo JSON
+    (tipo_entrega + endereço, ver validar_entrega); devolve url_pix."""
     _exigir('cliente')
+    entrega, erros = validar_entrega(_corpo())
+    if erros:
+        return _json(dict(ok=False, erro=list(erros.values())[0], erros=erros), 400)
     try:
-        pedido_id = criar_pedido_do_carrinho(auth.user_id)
+        pedido_id = criar_pedido_do_carrinho(auth.user_id, entrega)
     except ErroDeNegocio as e:
         return _erro(str(e), 409)
     return _json(dict(ok=True, pedido_id=pedido_id,

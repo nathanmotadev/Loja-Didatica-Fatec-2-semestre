@@ -7,16 +7,17 @@
 </div>
 <div class="tabela-wrap">
   <table class="tabela empilha">
-    <thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th class="num">Total</th><th>Situação</th><th></th></tr></thead>
+    <thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Recebimento</th><th class="num">Total</th><th>Situação</th><th></th></tr></thead>
     <tbody>
-    {{if not linhas:}}<tr><td colspan="6" class="vazio">Nenhum pedido{{if filtro:}} com esta situação{{pass}}.</td></tr>{{pass}}
+    {{if not linhas:}}<tr><td colspan="7" class="vazio">Nenhum pedido{{if filtro:}} com esta situação{{pass}}.</td></tr>{{pass}}
     {{for l in linhas:}}
       <tr>
         <td data-rotulo="Pedido"><a class="mono" href="{{=URL('operador', 'pedido', args=[l.pedido.id])}}">{{=l.pedido.codigo}}</a></td>
         <td data-rotulo="Data">{{=data_br(l.pedido.data_pedido)}}</td>
         <td data-rotulo="Cliente">{{=nome_usuario(l.auth_user) if l.auth_user.email else '—'}}<br><span class="pequeno texto-3">{{=l.auth_user.email or ''}}</span></td>
+        <td data-rotulo="Recebimento">{{='Retirada' if l.pedido.tipo_entrega == 'retirada' else 'Entrega'}}</td>
         <td data-rotulo="Total" class="num">{{=moeda(l.pedido.total)}}</td>
-        <td data-rotulo="Situação"><span class="etiqueta {{=l.pedido.status}}">{{=rotulo_pedido(l.pedido.status)}}</span></td>
+        <td data-rotulo="Situação"><span class="etiqueta {{=l.pedido.status}}">{{=rotulo_etapa(l.pedido, l.pedido.status)}}</span></td>
         <td class="acoes-td"><a class="btn btn-secundario btn-p" href="{{=URL('operador', 'pedido', args=[l.pedido.id])}}">Abrir</a></td>
       </tr>
     {{pass}}

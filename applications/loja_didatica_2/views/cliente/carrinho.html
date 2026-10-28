@@ -17,11 +17,8 @@
         <div class="meta">{{=i['quantidade']}} × {{=i['preco_fmt']}} = <strong>{{=i['subtotal_fmt']}}</strong></div></div></div>
       {{pass}}
       {{if resumo['itens']:}}
-      <form method="post" action="{{=URL('cliente', 'checkout')}}" class="mt-1">
-        <input type="hidden" name="_csrf" value="{{=csrf_token()}}">
-        <p class="resumo-total">Total: {{=resumo['total_fmt']}}</p>
-        <button class="btn btn-primario" type="submit">Finalizar e pagar com PIX</button>
-      </form>
+      <p class="resumo-total mt-1">Total: {{=resumo['total_fmt']}}</p>
+      <a class="btn btn-primario" href="{{=URL('cliente', 'entrega')}}">Continuar para a entrega</a>
       {{else:}}<p class="vazio-caixa">Seu carrinho está vazio.</p>{{pass}}
     </div>
   </noscript>

@@ -64,7 +64,12 @@
           </tbody>
         </table>
       </div>
-      <p class="pequeno texto-2 mt-1">Rastreio: <span class="mono">{{=pedido.codigo_rastreio}}</span> · Entrega em até {{=pedido.prazo_dias}} dias úteis após a confirmação · txid <span class="mono">{{=pix.txid}}</span></p>
+      {{if pedido.tipo_entrega == 'retirada':}}
+      <p class="pequeno texto-2 mt-1">Retirada na loja: {{=ENDERECO_LOJA}} · acompanhe em Meus pedidos quando estiver pronto · txid <span class="mono">{{=pix.txid}}</span></p>
+      {{else:}}
+      <p class="pequeno texto-2 mt-1">Entrega em: {{=texto_endereco(pedido)}}</p>
+      <p class="pequeno texto-2">Rastreio: <span class="mono">{{=pedido.codigo_rastreio}}</span> · Entrega em até {{=pedido.prazo_dias}} dias úteis após a confirmação · txid <span class="mono">{{=pix.txid}}</span></p>
+      {{pass}}
     </div>
   </div>
 </div>

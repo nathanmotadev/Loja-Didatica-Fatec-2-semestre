@@ -79,7 +79,7 @@ def pedido():
             else:
                 definir_status_entrega(p, request.vars.status)
                 avisar('ok', 'Pedido %s agora está em "%s".'
-                             % (p.codigo, rotulo_pedido(request.vars.status)))
+                             % (p.codigo, rotulo_etapa(p, request.vars.status)))
         except ErroDeNegocio as e:
             avisar('erro', str(e))
         redirect(URL('pedido', args=[p.id]))

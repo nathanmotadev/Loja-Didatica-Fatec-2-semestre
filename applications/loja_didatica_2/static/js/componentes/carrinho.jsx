@@ -1,7 +1,8 @@
 /* =============================================================================
    <Carrinho/> — carrinho persistente do cliente.
-   GET api/carrinho | POST api/carrinho_atualizar | api/carrinho_remover |
-   api/carrinho_finalizar (cria o pedido e redireciona para a tela do PIX).
+   GET api/carrinho | POST api/carrinho_atualizar | api/carrinho_remover.
+   "Continuar" leva à tela cliente/entrega (endereço ou retirada na loja),
+   que cria o pedido e redireciona para o PIX.
    ============================================================================= */
 (() => {
 const { useState, useEffect } = React;
@@ -60,20 +61,6 @@ function Carrinho({ inicial }) {
     mostrarToast(item.nome + ' removido do carrinho.');
   }
 
-  async function finalizar() {
-    setOcupado(true);
-    const r = await LojaAPI.post('carrinho_finalizar', {});
-    if (r.ok) {
-      mostrarToast('Pedido criado. Abrindo o pagamento PIX…');
-      window.location = r.url_pix;
-    } else {
-      setErro(r.erro || 'Não foi possível finalizar.');
-      const atual = await LojaAPI.get('carrinho');     // estoque pode ter mudado
-      if (atual.ok) setCarrinho(atual.carrinho);
-      setOcupado(false);
-    }
-  }
-
   if (!carrinho) return <p className="carregando">Carregando carrinho…</p>;
 
   if (carrinho.itens.length === 0) {
@@ -98,12 +85,12 @@ function Carrinho({ inicial }) {
       <aside className="cartao">
         <h2>Resumo</h2>
         <div className="resumo-linha"><span>Itens</span><span>{carrinho.quantidade_total}</span></div>
-        <div className="resumo-linha"><span>Entrega</span><span>até {carrinho.prazo_dias} dias úteis</span></div>
+        <div className="resumo-linha"><span>Entrega</span><span>até {carrinho.prazo_dias} dias úteis ou retire na loja</span></div>
         <div className="resumo-linha"><span>Frete</span><span>grátis</span></div>
         <div className="resumo-linha resumo-total"><span>Total</span><span className="preco">{carrinho.total_fmt}</span></div>
-        <button type="button" className="btn btn-primario btn-largo mt-1" onClick={finalizar} disabled={ocupado || bloqueado}>
-          {ocupado ? 'Aguarde…' : 'Finalizar e pagar com PIX'}
-        </button>
+        {ocupado || bloqueado
+          ? <button type="button" className="btn btn-primario btn-largo mt-1" disabled>Continuar para a entrega</button>
+          : <a className="btn btn-primario btn-largo mt-1" href={LOJA.urls.entrega}>Continuar para a entrega</a>}
         {bloqueado && <p className="pequeno texto-2 mt-1">Ajuste os itens sem estoque antes de finalizar.</p>}
         <a className="btn btn-discreto btn-largo mt-1" href={LOJA.urls.catalogo}>Continuar comprando</a>
         <p className="pequeno texto-3 mt-1">O estoque é reservado quando o pedido é criado e devolvido se ele for cancelado.</p>
