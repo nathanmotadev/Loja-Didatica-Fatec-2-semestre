@@ -1,0 +1,13 @@
+web2py/
+venv/
+__pycache__/
+*.pyc
+loja.sqlite
+httpserver.log
+httpserver.pid
+parameters_*.py
+applications/loja_didatica_2/sessions/
+applications/loja_didatica_2/errors/
+applications/loja_didatica_2/cache/
+applications/loja_didatica_2/databases/
+.DS_Store
