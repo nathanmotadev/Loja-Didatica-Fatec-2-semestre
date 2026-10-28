@@ -82,7 +82,8 @@ def produto_para_json(p):
                 categoria_id=p.categoria,
                 categoria=(p.categoria.nome if p.categoria else ''),
                 imagem=url_imagem(p, mini=True), imagem_grande=url_imagem(p, mini=False),
-                url=URL('default', 'produto', args=[p.id]))
+                url=URL('default', 'produto', args=[p.id]),
+                avaliacao=resumo_avaliacoes(p.id))
 
 
 def resumo_carrinho(usuario_id):
@@ -98,7 +99,8 @@ def resumo_carrinho(usuario_id):
                           quantidade=item.quantidade, estoque=p.estoque,
                           subtotal=float(subtotal), subtotal_fmt=moeda(subtotal),
                           imagem=url_imagem(p, mini=True), ativo=bool(p.ativo),
-                          url=URL('default', 'produto', args=[p.id])))
+                          url=URL('default', 'produto', args=[p.id]),
+                avaliacao=resumo_avaliacoes(p.id)))
     return dict(itens=itens, total=float(total), total_fmt=moeda(total),
                 quantidade_total=sum(i['quantidade'] for i in itens),
                 prazo_dias=prazo)
@@ -431,3 +433,71 @@ def arquivo_enviado(campo):
         return None
     dados = arquivo.file.read()
     return (arquivo.filename, dados) if dados else None
+
+
+# =============================================================================
+#  AVALIAÇÕES DE PRODUTOS (melhoria 1)
+# =============================================================================
+STATUS_QUE_LIBERAM_AVALIACAO = ('pago', 'separando', 'enviado', 'em_entrega', 'entregue')
+
+
+def cliente_comprou(usuario_id, produto_id):
+    """True se o cliente tem ao menos um pedido com pagamento confirmado
+    (ou além) contendo o produto — pedidos cancelados ou não pagos não contam."""
+    if not usuario_id:
+        return False
+    return db((db.pedido.cliente == usuario_id) &
+              (db.pedido.status.belongs(STATUS_QUE_LIBERAM_AVALIACAO)) &
+              (db.pedido_item.pedido == db.pedido.id) &
+              (db.pedido_item.produto == produto_id)).count() > 0
+
+
+def resumo_avaliacoes(produto_id):
+    """Média (1 casa decimal) e quantidade de avaliações de um produto."""
+    media = db.avaliacao.nota.avg()
+    linha = db(db.avaliacao.produto == produto_id).select(media, db.avaliacao.id.count()).first()
+    total = linha[db.avaliacao.id.count()] or 0
+    valor = float(linha[media]) if total else 0.0
+    return dict(media=round(valor, 1), total=total)
+
+
+def listar_avaliacoes(produto_id):
+    return db((db.avaliacao.produto == produto_id) &
+              (db.avaliacao.usuario == db.auth_user.id)
+              ).select(orderby=~db.avaliacao.atualizado_em)
+
+
+def minha_avaliacao(usuario_id, produto_id):
+    if not usuario_id:
+        return None
+    return db((db.avaliacao.produto == produto_id) &
+              (db.avaliacao.usuario == usuario_id)).select().first()
+
+
+def salvar_avaliacao(usuario_id, produto_id, nota, comentario=''):
+    """Cria ou atualiza a avaliação do cliente. Valida compra, nota e tamanho."""
+    if not db.produto(produto_id):
+        raise ErroDeNegocio('Produto não encontrado.')
+    if not cliente_comprou(usuario_id, produto_id):
+        raise ErroDeNegocio('Só quem comprou este produto (com pagamento confirmado) pode avaliá-lo.')
+    try:
+        nota = int(nota)
+    except (TypeError, ValueError):
+        raise ErroDeNegocio('Escolha uma nota de 1 a 5.')
+    if nota < 1 or nota > 5:
+        raise ErroDeNegocio('Escolha uma nota de 1 a 5.')
+    comentario = (comentario or '').strip()
+    if len(comentario) > 500:
+        raise ErroDeNegocio('O comentário pode ter no máximo 500 caracteres.')
+    existente = minha_avaliacao(usuario_id, produto_id)
+    if existente:
+        existente.update_record(nota=nota, comentario=comentario)
+    else:
+        db.avaliacao.insert(produto=produto_id, usuario=usuario_id,
+                            nota=nota, comentario=comentario)
+
+
+def estrelas(nota):
+    """4 -> '★★★★☆' (texto simples, sem imagens)."""
+    n = int(round(float(nota or 0)))
+    return '★' * n + '☆' * (5 - n)

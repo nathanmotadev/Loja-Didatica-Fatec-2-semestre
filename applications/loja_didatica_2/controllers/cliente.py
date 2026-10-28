@@ -33,6 +33,20 @@ def adicionar():
 
 
 @requer_papel('cliente')
+def avaliar():
+    """Grava (ou atualiza) a avaliação do cliente para o produto args(0)."""
+    exigir_post_seguro()
+    produto_id = request.args(0, cast=int)
+    try:
+        salvar_avaliacao(auth.user_id, produto_id, request.vars.nota,
+                         request.vars.comentario)
+        avisar('ok', 'Avaliação registrada. Obrigado!')
+    except ErroDeNegocio as e:
+        avisar('erro', str(e))
+    redirect(URL('default', 'produto', args=[produto_id]) + '#avaliacoes')
+
+
+@requer_papel('cliente')
 def checkout():
     """Fecha o pedido a partir do carrinho (POST clássico; a versão React usa
     api/carrinho_finalizar) e redireciona para a tela do PIX."""

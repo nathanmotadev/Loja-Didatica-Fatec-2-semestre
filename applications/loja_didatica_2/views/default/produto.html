@@ -34,3 +34,40 @@
     </div>
   </div>
 </div>
+
+<section class="cartao mt-1" id="avaliacoes">
+  <h2>Avaliações</h2>
+  {{if resumo['total']:}}
+  <p class="media-nota"><span class="estrelas" aria-hidden="true">{{=estrelas(resumo['media'])}}</span>
+    <strong>{{=resumo['media']}}</strong> de 5 · {{=resumo['total']}} avaliação(ões)</p>
+  {{else:}}
+  <p class="texto-3">Este produto ainda não tem avaliações.</p>
+  {{pass}}
+
+  {{if pode_avaliar:}}
+  <form method="post" action="{{=URL('cliente', 'avaliar', args=[p.id])}}" class="form-avaliacao">
+    <input type="hidden" name="_csrf" value="{{=csrf_token()}}">
+    <h3>{{='Atualizar minha avaliação' if minha else 'Avaliar este produto'}}</h3>
+    <label for="nota">Nota</label>
+    <select id="nota" name="nota" required>
+      {{for n in (5, 4, 3, 2, 1):}}
+      <option value="{{=n}}" {{if minha and minha.nota == n:}}selected{{pass}}>{{=n}} — {{=estrelas(n)}}</option>
+      {{pass}}
+    </select>
+    <label for="comentario">Comentário (opcional)</label>
+    <textarea id="comentario" name="comentario" rows="3" maxlength="500">{{=minha.comentario if minha else ''}}</textarea>
+    <button class="btn btn-primario" type="submit">Salvar avaliação</button>
+  </form>
+  {{elif tem_papel('cliente'):}}
+  <p class="pequeno texto-3">Só quem comprou este produto (com pagamento confirmado) pode avaliá-lo.</p>
+  {{pass}}
+
+  {{for a in avaliacoes:}}
+  <article class="avaliacao-item">
+    <p><span class="estrelas" aria-label="nota {{=a.avaliacao.nota}} de 5">{{=estrelas(a.avaliacao.nota)}}</span>
+      <strong>{{=nome_usuario(a.auth_user)}}</strong>
+      <span class="pequeno texto-3"> · {{=data_br(a.avaliacao.atualizado_em, com_hora=False)}}</span></p>
+    {{if a.avaliacao.comentario:}}<p>{{=a.avaliacao.comentario}}</p>{{pass}}
+  </article>
+  {{pass}}
+</section>

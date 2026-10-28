@@ -18,7 +18,11 @@ def produto():
     if not p or (not p.ativo and not tem_papel('vendedor', 'operador', 'administrador')):
         avisar('erro', 'Produto não encontrado.')
         redirect(URL('index'))
-    return dict(p=p, no_carrinho=quantidade_carrinho(auth.user_id))
+    return dict(p=p, no_carrinho=quantidade_carrinho(auth.user_id),
+                resumo=resumo_avaliacoes(p.id),
+                avaliacoes=listar_avaliacoes(p.id),
+                pode_avaliar=tem_papel('cliente') and cliente_comprou(auth.user_id, p.id),
+                minha=minha_avaliacao(auth.user_id, p.id))
 
 
 def sobre():

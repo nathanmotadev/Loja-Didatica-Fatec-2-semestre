@@ -223,6 +223,18 @@ db.define_table('mensagem',
     Field('cancelada', 'boolean', default=False),
     Field('criado_em', 'datetime', default=request.now))
 
+# MELHORIA 1 — avaliações de produtos: nota de 1 a 5 e comentário opcional.
+# Só quem comprou (pedido pago em diante) avalia; no máximo uma avaliação por
+# cliente em cada produto (regra em regras.py -> salvar_avaliacao).
+db.define_table('avaliacao',
+    Field('produto', 'reference produto', ondelete='CASCADE', notnull=True),
+    Field('usuario', 'reference auth_user', ondelete='CASCADE', notnull=True),
+    Field('nota', 'integer', notnull=True, requires=IS_INT_IN_RANGE(1, 6),
+          label='Nota'),
+    Field('comentario', 'string', length=500, default='', label='Comentário'),
+    Field('criado_em', 'datetime', default=request.now),
+    Field('atualizado_em', 'datetime', default=request.now, update=request.now))
+
 # -----------------------------------------------------------------------------
 # 5. Papéis do usuário logado (consultados no banco a cada requisição, para que
 #    mudanças feitas pelo administrador valham sem novo login)
