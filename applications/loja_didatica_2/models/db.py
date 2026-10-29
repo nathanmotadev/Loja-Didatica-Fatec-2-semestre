@@ -46,7 +46,7 @@ response.generic_patterns = []          # não expõe views genéricas (.json/.x
 # -----------------------------------------------------------------------------
 # 2. Constantes da loja
 # -----------------------------------------------------------------------------
-NOME_LOJA = 'Loja Didática 2'
+NOME_LOJA = 'Skateroom Fatec'
 
 PAPEIS = ['cliente', 'vendedor', 'operador', 'administrador']
 PAPEL_DESCRICAO = {
@@ -57,13 +57,14 @@ PAPEL_DESCRICAO = {
 }
 
 STATUS_PEDIDO = ['aguardando_pagamento', 'pago', 'separando', 'enviado',
-                 'em_entrega', 'entregue', 'cancelado']
+                 'em_entrega', 'pronto_retirada', 'entregue', 'cancelado']
 STATUS_PEDIDO_ROTULO = {
     'aguardando_pagamento': 'Aguardando pagamento',
     'pago':                 'Pago',
     'separando':            'Separando o pedido',
     'enviado':              'Entregue à transportadora',
     'em_entrega':           'Em entrega',
+    'pronto_retirada':      'Pronto para retirada',
     'entregue':             'Entregue',
     'cancelado':            'Cancelado',
 }
@@ -71,6 +72,17 @@ STATUS_PEDIDO_ROTULO = {
 STATUS_SEM_CANCELAMENTO = {'enviado', 'em_entrega', 'entregue', 'cancelado'}
 # sequência que o operador percorre na entrega
 FLUXO_ENTREGA = ['pago', 'separando', 'enviado', 'em_entrega', 'entregue']
+# pedidos retirados na loja não passam pela transportadora
+FLUXO_RETIRADA = ['pago', 'separando', 'pronto_retirada', 'entregue']
+STATUS_PAGOS = sorted(set(FLUXO_ENTREGA) | set(FLUXO_RETIRADA))
+
+# Forma de recebimento escolhida no checkout
+TIPOS_ENTREGA = ['entrega', 'retirada']
+TIPO_ENTREGA_ROTULO = {'entrega': 'Entrega no endereço', 'retirada': 'Retirada na loja'}
+ENDERECO_LOJA = 'Av. Tiradentes, 615 — Bom Retiro, São Paulo/SP — CEP 01101-010'
+HORARIO_RETIRADA = 'segunda a sexta, das 9h às 18h'
+UFS = ['AC', 'AL', 'AM', 'AP', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MG', 'MS', 'MT', 'PA',
+       'PB', 'PE', 'PI', 'PR', 'RJ', 'RN', 'RO', 'RR', 'RS', 'SC', 'SE', 'SP', 'TO']
 
 STATUS_PIX = ['gerado', 'informado', 'confirmado', 'recusado']
 STATUS_PIX_ROTULO = {
@@ -160,6 +172,16 @@ db.define_table('pedido',
     Field('data_pagamento', 'datetime'),
     Field('data_cancelamento', 'datetime'),
     Field('observacao', 'text', default=''),
+    # recebimento: entrega no endereço abaixo ou retirada na loja (endereço vazio)
+    Field('tipo_entrega', 'string', length=10, notnull=True, default='entrega',
+          requires=IS_IN_SET(TIPOS_ENTREGA)),
+    Field('cep', 'string', length=9, default=''),
+    Field('logradouro', 'string', length=120, default=''),
+    Field('numero', 'string', length=10, default=''),
+    Field('complemento', 'string', length=60, default=''),
+    Field('bairro', 'string', length=60, default=''),
+    Field('cidade', 'string', length=60, default=''),
+    Field('uf', 'string', length=2, default=''),
     format='%(codigo)s')
 
 # Itens do pedido guardam nome e preço da época da compra (snapshot)
@@ -222,6 +244,18 @@ db.define_table('mensagem',
     Field('lida', 'boolean', default=False),
     Field('cancelada', 'boolean', default=False),
     Field('criado_em', 'datetime', default=request.now))
+
+# MELHORIA 1 — avaliações de produtos: nota de 1 a 5 e comentário opcional.
+# Só quem comprou (pedido pago em diante) avalia; no máximo uma avaliação por
+# cliente em cada produto (regra em regras.py -> salvar_avaliacao).
+db.define_table('avaliacao',
+    Field('produto', 'reference produto', ondelete='CASCADE', notnull=True),
+    Field('usuario', 'reference auth_user', ondelete='CASCADE', notnull=True),
+    Field('nota', 'integer', notnull=True, requires=IS_INT_IN_RANGE(1, 6),
+          label='Nota'),
+    Field('comentario', 'string', length=500, default='', label='Comentário'),
+    Field('criado_em', 'datetime', default=request.now),
+    Field('atualizado_em', 'datetime', default=request.now, update=request.now))
 
 # -----------------------------------------------------------------------------
 # 5. Papéis do usuário logado (consultados no banco a cada requisição, para que
@@ -376,7 +410,8 @@ def contexto_js():
                      nome=(auth.user.first_name if auth.user else ''),
                      papeis=sorted(MEUS_PAPEIS)),
         urls=dict(login=URL('default', 'login'), catalogo=URL('default', 'index'),
-                  carrinho=URL('cliente', 'carrinho'), pedidos=URL('cliente', 'pedidos')),
+                  carrinho=URL('cliente', 'carrinho'), entrega=URL('cliente', 'entrega'),
+                  pedidos=URL('cliente', 'pedidos')),
     )
     texto = json.dumps(dados, ensure_ascii=False)
     return XML(texto.replace('<', '\\u003c').replace('>', '\\u003e'))

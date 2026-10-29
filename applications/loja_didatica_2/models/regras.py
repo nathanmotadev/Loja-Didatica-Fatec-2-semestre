@@ -8,6 +8,7 @@
 # =============================================================================
 import io
 import os
+import re
 import base64
 from decimal import Decimal
 
@@ -82,7 +83,8 @@ def produto_para_json(p):
                 categoria_id=p.categoria,
                 categoria=(p.categoria.nome if p.categoria else ''),
                 imagem=url_imagem(p, mini=True), imagem_grande=url_imagem(p, mini=False),
-                url=URL('default', 'produto', args=[p.id]))
+                url=URL('default', 'produto', args=[p.id]),
+                avaliacao=resumo_avaliacoes(p.id))
 
 
 def resumo_carrinho(usuario_id):
@@ -98,7 +100,8 @@ def resumo_carrinho(usuario_id):
                           quantidade=item.quantidade, estoque=p.estoque,
                           subtotal=float(subtotal), subtotal_fmt=moeda(subtotal),
                           imagem=url_imagem(p, mini=True), ativo=bool(p.ativo),
-                          url=URL('default', 'produto', args=[p.id])))
+                          url=URL('default', 'produto', args=[p.id]),
+                avaliacao=resumo_avaliacoes(p.id)))
     return dict(itens=itens, total=float(total), total_fmt=moeda(total),
                 quantidade_total=sum(i['quantidade'] for i in itens),
                 prazo_dias=prazo)
@@ -161,9 +164,62 @@ def quantidade_carrinho(usuario_id):
 # =============================================================================
 #  PEDIDO — criação a partir do carrinho, cancelamento e entrega
 # =============================================================================
-def criar_pedido_do_carrinho(usuario_id):
+CAMPOS_ENDERECO = ('cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'uf')
+RE_CEP = re.compile(r'^\d{5}-?\d{3}$')
+
+
+def validar_entrega(dados):
+    """Confere a forma de recebimento escolhida no checkout.
+
+    Devolve (entrega, erros): entrega é o dicionário pronto para gravar no
+    pedido e erros mapeia campo -> mensagem (vazio quando está tudo certo).
+    """
+    tipo = (dados.get('tipo_entrega') or '').strip()
+    if tipo not in TIPOS_ENTREGA:
+        return {}, {'tipo_entrega': 'Escolha entre receber no endereço ou retirar na loja.'}
+    entrega = dict(tipo_entrega=tipo)
+    if tipo == 'retirada':
+        entrega.update((c, '') for c in CAMPOS_ENDERECO)
+        return entrega, {}
+    for c in CAMPOS_ENDERECO:
+        entrega[c] = ' '.join(str(dados.get(c) or '').split())[:db.pedido[c].length]
+    entrega['uf'] = entrega['uf'].upper()
+    erros = {}
+    if not RE_CEP.match(entrega['cep']):
+        erros['cep'] = 'Informe o CEP com 8 dígitos (ex.: 01101-010).'
+    else:
+        digitos = re.sub(r'\D', '', entrega['cep'])
+        entrega['cep'] = digitos[:5] + '-' + digitos[5:]
+    for campo, nome in (('logradouro', 'a rua'), ('numero', 'o número'),
+                        ('bairro', 'o bairro'), ('cidade', 'a cidade')):
+        if not entrega[campo]:
+            erros[campo] = 'Informe %s.' % nome
+    if entrega['uf'] not in UFS:
+        erros['uf'] = 'Escolha o estado.'
+    return entrega, erros
+
+
+def ultimo_endereco(usuario_id):
+    """Endereço do pedido com entrega mais recente do cliente (para pré-preencher)."""
+    p = db((db.pedido.cliente == usuario_id) & (db.pedido.tipo_entrega == 'entrega') &
+           (db.pedido.cep != '')).select(orderby=~db.pedido.id, limitby=(0, 1)).first()
+    return dict((c, p[c]) for c in CAMPOS_ENDERECO) if p else {}
+
+
+def texto_endereco(pedido):
+    """Endereço do pedido em uma linha, ou o local de retirada."""
+    if pedido.tipo_entrega == 'retirada':
+        return 'Retirada na loja: ' + ENDERECO_LOJA
+    if not pedido.cep:           # pedidos feitos antes da etapa de entrega
+        return 'Endereço não informado.'
+    rua = ', '.join(x for x in (pedido.logradouro, pedido.numero, pedido.complemento) if x)
+    return '%s — %s, %s/%s — CEP %s' % (rua, pedido.bairro, pedido.cidade, pedido.uf, pedido.cep)
+
+
+def criar_pedido_do_carrinho(usuario_id, entrega):
     """Transforma o carrinho em pedido + itens + PIX, baixando o estoque.
 
+    "entrega" vem de validar_entrega(): retirada na loja ou endereço.
     Tudo acontece em uma única transação: se um produto não tiver estoque,
     db.rollback() desfaz o pedido inteiro e a mensagem volta para o cliente.
     """
@@ -173,7 +229,7 @@ def criar_pedido_do_carrinho(usuario_id):
     pedido_id = db.pedido.insert(codigo=gerar_codigo_pedido(),
                                  codigo_rastreio=gerar_codigo_rastreio(),
                                  cliente=usuario_id, total=0,
-                                 status='aguardando_pagamento')
+                                 status='aguardando_pagamento', **entrega)
     total, prazo = Decimal('0.00'), 0
     try:
         for linha in linhas:
@@ -228,11 +284,24 @@ def cancelar_pedido(pedido, motivo, por_operador=False):
     return estorno   # True se já estava pago (aviso de estorno)
 
 
+def fluxo_do_pedido(pedido):
+    """Etapas que o operador percorre: transportadora ou retirada na loja."""
+    return FLUXO_RETIRADA if pedido.tipo_entrega == 'retirada' else FLUXO_ENTREGA
+
+
+def rotulo_etapa(pedido, status):
+    """Como rotulo_pedido(), mas "Entregue" vira "Retirado" na retirada."""
+    if status == 'entregue' and pedido.tipo_entrega == 'retirada':
+        return 'Retirado na loja'
+    return rotulo_pedido(status)
+
+
 def definir_status_entrega(pedido, novo_status):
     """Operador altera a etapa de entrega (só de pedidos pagos)."""
-    if novo_status not in FLUXO_ENTREGA:
+    fluxo = fluxo_do_pedido(pedido)
+    if novo_status not in fluxo:
         raise ErroDeNegocio('Status de entrega inválido.')
-    if pedido.status not in FLUXO_ENTREGA:
+    if pedido.status not in fluxo:
         raise ErroDeNegocio('Só pedidos pagos podem ter a entrega atualizada.')
     pedido.update_record(status=novo_status)
 
@@ -431,3 +500,71 @@ def arquivo_enviado(campo):
         return None
     dados = arquivo.file.read()
     return (arquivo.filename, dados) if dados else None
+
+
+# =============================================================================
+#  AVALIAÇÕES DE PRODUTOS (melhoria 1)
+# =============================================================================
+STATUS_QUE_LIBERAM_AVALIACAO = tuple(STATUS_PAGOS)
+
+
+def cliente_comprou(usuario_id, produto_id):
+    """True se o cliente tem ao menos um pedido com pagamento confirmado
+    (ou além) contendo o produto — pedidos cancelados ou não pagos não contam."""
+    if not usuario_id:
+        return False
+    return db((db.pedido.cliente == usuario_id) &
+              (db.pedido.status.belongs(STATUS_QUE_LIBERAM_AVALIACAO)) &
+              (db.pedido_item.pedido == db.pedido.id) &
+              (db.pedido_item.produto == produto_id)).count() > 0
+
+
+def resumo_avaliacoes(produto_id):
+    """Média (1 casa decimal) e quantidade de avaliações de um produto."""
+    media = db.avaliacao.nota.avg()
+    linha = db(db.avaliacao.produto == produto_id).select(media, db.avaliacao.id.count()).first()
+    total = linha[db.avaliacao.id.count()] or 0
+    valor = float(linha[media]) if total else 0.0
+    return dict(media=round(valor, 1), total=total)
+
+
+def listar_avaliacoes(produto_id):
+    return db((db.avaliacao.produto == produto_id) &
+              (db.avaliacao.usuario == db.auth_user.id)
+              ).select(orderby=~db.avaliacao.atualizado_em)
+
+
+def minha_avaliacao(usuario_id, produto_id):
+    if not usuario_id:
+        return None
+    return db((db.avaliacao.produto == produto_id) &
+              (db.avaliacao.usuario == usuario_id)).select().first()
+
+
+def salvar_avaliacao(usuario_id, produto_id, nota, comentario=''):
+    """Cria ou atualiza a avaliação do cliente. Valida compra, nota e tamanho."""
+    if not db.produto(produto_id):
+        raise ErroDeNegocio('Produto não encontrado.')
+    if not cliente_comprou(usuario_id, produto_id):
+        raise ErroDeNegocio('Só quem comprou este produto (com pagamento confirmado) pode avaliá-lo.')
+    try:
+        nota = int(nota)
+    except (TypeError, ValueError):
+        raise ErroDeNegocio('Escolha uma nota de 1 a 5.')
+    if nota < 1 or nota > 5:
+        raise ErroDeNegocio('Escolha uma nota de 1 a 5.')
+    comentario = (comentario or '').strip()
+    if len(comentario) > 500:
+        raise ErroDeNegocio('O comentário pode ter no máximo 500 caracteres.')
+    existente = minha_avaliacao(usuario_id, produto_id)
+    if existente:
+        existente.update_record(nota=nota, comentario=comentario)
+    else:
+        db.avaliacao.insert(produto=produto_id, usuario=usuario_id,
+                            nota=nota, comentario=comentario)
+
+
+def estrelas(nota):
+    """4 -> '★★★★☆' (texto simples, sem imagens)."""
+    n = int(round(float(nota or 0)))
+    return '★' * n + '☆' * (5 - n)

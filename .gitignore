@@ -11,3 +11,7 @@ applications/loja_didatica_2/errors/
 applications/loja_didatica_2/cache/
 applications/loja_didatica_2/databases/
 .DS_Store
+
+# arquivos grandes locais (nao enviar ao GitHub)
+*.zip
+ziuIXfuw

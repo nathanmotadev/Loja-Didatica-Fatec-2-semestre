@@ -14,30 +14,30 @@ USUARIOS_DEMO = [
 
 # (código, nome, categoria, preço, estoque inicial, prazo em dias úteis, descrição)
 PRODUTOS_DEMO = [
-    ('PRD-10001', 'Camiseta Básica', 'Vestuário', 49.90, 40, 5,
-     'Camiseta 100% algodão, malha penteada, disponível em várias cores.'),
-    ('PRD-10002', 'Moletom com Capuz', 'Vestuário', 159.90, 15, 7,
+    ('SHP-10001', 'Shape Maple 8.0"', 'Shapes', 249.90, 18, 5,
+     'Shape de 7 camadas de maple canadense, concave médio, para street e transição.'),
+    ('SHP-10002', 'Shape Maple 8.25"', 'Shapes', 259.90, 14, 5,
+     'Shape de 7 camadas de maple, um pouco mais largo, com mais estabilidade nas manobras.'),
+    ('RDA-10001', 'Rodas 52 mm 99A (jogo com 4)', 'Rodas', 149.90, 30, 5,
+     'Rodas de poliuretano duras, ideais para street e skatepark.'),
+    ('RDA-10002', 'Rodas 56 mm 95A (jogo com 4)', 'Rodas', 159.90, 20, 5,
+     'Rodas mais macias, ótimas para pisos irregulares e para cruzar a cidade.'),
+    ('TRK-10001', 'Trucks de Alumínio 139 mm (par)', 'Trucks', 289.90, 10, 7,
+     'Par de trucks com pivô reforçado e bushings 90A.'),
+    ('TRK-10002', 'Trucks de Alumínio 149 mm (par)', 'Trucks', 319.90, 8, 7,
+     'Par de trucks para shapes de 8.25" a 8.5", com eixo de aço.'),
+    ('CAL-10001', 'Tênis Skate Canvas', 'Calçados', 299.90, 16, 7,
+     'Tênis de lona com sola vulcanizada e reforço na biqueira.'),
+    ('CAL-10002', 'Tênis Skate Camurça', 'Calçados', 399.90, 0, 7,
+     'Tênis de camurça com palmilha acolchoada e costura reforçada.'),
+    ('PRD-10001', 'Camiseta Skateroom', 'Vestuário', 79.90, 40, 5,
+     'Algodão penteado com a estampa do emblema Skateroom Fatec.'),
+    ('PRD-10002', 'Moletom com Capuz', 'Vestuário', 189.90, 15, 7,
      'Moletom flanelado com capuz e bolso canguru. Tamanhos P ao GG.'),
-    ('PRD-10003', 'Boné Bordado', 'Vestuário', 59.90, 25, 5,
-     'Boné aba curva com ajuste traseiro e bordado frontal.'),
-    ('PRD-10004', 'Caneca Térmica 500 ml', 'Acessórios', 89.90, 30, 7,
-     'Caneca de aço inox com tampa hermética; mantém a temperatura por 12 horas.'),
-    ('PRD-10005', 'Garrafa Squeeze 750 ml', 'Acessórios', 39.90, 50, 5,
-     'Garrafa livre de BPA com bico retrátil, ideal para academia.'),
-    ('PRD-10006', 'Mochila para Notebook', 'Acessórios', 199.90, 12, 10,
-     'Mochila impermeável com compartimento acolchoado para notebook de até 15,6".'),
-    ('PRD-10007', 'Mouse Sem Fio', 'Informática', 79.90, 35, 5,
-     'Mouse óptico 2.4 GHz com 6 botões e receptor USB nano.'),
-    ('PRD-10008', 'Teclado Mecânico Compacto', 'Informática', 349.90, 8, 10,
-     'Teclado 65% com switches vermelhos, keycaps PBT e iluminação branca.'),
-    ('PRD-10009', 'Headset com Microfone', 'Informática', 229.90, 10, 7,
-     'Headset over-ear com microfone removível e cabo de 2 m.'),
-    ('PRD-10010', 'Hub USB-C 7 em 1', 'Informática', 189.90, 20, 7,
-     'Hub com HDMI 4K, 3 portas USB 3.0, leitor SD/microSD e USB-C PD 100 W.'),
-    ('PRD-10011', 'Caderno Pautado 200 folhas', 'Papelaria', 34.90, 60, 5,
-     'Caderno universitário capa dura, 10 matérias, papel 70 g/m².'),
-    ('PRD-10012', 'Kit de Canetas Coloridas', 'Papelaria', 24.90, 0, 5,
-     'Estojo com 12 canetas ponta fina 0,4 mm em cores sortidas.'),
+    ('PRD-10003', 'Boné Skateroom', 'Vestuário', 59.90, 25, 5,
+     'Aba curva, ajuste traseiro e bordado do emblema.'),
+    ('PRD-10006', 'Mochila Skate', 'Acessórios', 199.90, 12, 10,
+     'Impermeável, com compartimento acolchoado para notebook.'),
 ]
 
 
@@ -58,10 +58,12 @@ def carga_inicial():
     auth.add_membership(grupos['vendedor'], usuarios['administrador'])
 
     categorias = {}
-    for nome, desc in [('Vestuário', 'Camisetas, moletons e bonés'),
-                       ('Acessórios', 'Canecas, garrafas e mochilas'),
-                       ('Informática', 'Periféricos e acessórios para computador'),
-                       ('Papelaria', 'Cadernos e materiais de escrita')]:
+    for nome, desc in [('Shapes', 'Shapes de maple para street e transição'),
+                       ('Rodas', 'Rodas de poliuretano em várias durezas'),
+                       ('Trucks', 'Trucks de alumínio e acessórios'),
+                       ('Calçados', 'Tênis para skate'),
+                       ('Vestuário', 'Camisetas, moletons e bonés'),
+                       ('Acessórios', 'Mochilas e itens para o dia a dia')]:
         categorias[nome] = db.categoria.insert(nome=nome, descricao=desc)
 
     for codigo, nome, cat, preco, estoque, prazo, desc in PRODUTOS_DEMO:

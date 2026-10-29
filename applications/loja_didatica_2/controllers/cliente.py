@@ -33,16 +33,42 @@ def adicionar():
 
 
 @requer_papel('cliente')
-def checkout():
-    """Fecha o pedido a partir do carrinho (POST clássico; a versão React usa
-    api/carrinho_finalizar) e redireciona para a tela do PIX."""
+def avaliar():
+    """Grava (ou atualiza) a avaliação do cliente para o produto args(0)."""
     exigir_post_seguro()
+    produto_id = request.args(0, cast=int)
     try:
-        pedido_id = criar_pedido_do_carrinho(auth.user_id)
+        salvar_avaliacao(auth.user_id, produto_id, request.vars.nota,
+                         request.vars.comentario)
+        avisar('ok', 'Avaliação registrada. Obrigado!')
     except ErroDeNegocio as e:
         avisar('erro', str(e))
+    redirect(URL('default', 'produto', args=[produto_id]) + '#avaliacoes')
+
+
+@requer_papel('cliente')
+def entrega():
+    """Etapa entre o carrinho e o PIX: o cliente escolhe receber no endereço
+    ou retirar na loja. GET mostra o formulário; POST fecha o pedido."""
+    resumo = resumo_carrinho(auth.user_id)
+    if not resumo['itens']:
+        avisar('erro', 'Seu carrinho está vazio.')
         redirect(URL('carrinho'))
-    redirect(URL('pix', args=[pedido_id]))
+    erros = {}
+    if request.env.request_method == 'POST':
+        exigir_post_seguro()
+        dados, erros = validar_entrega(request.vars)
+        if not erros:
+            try:
+                pedido_id = criar_pedido_do_carrinho(auth.user_id, dados)
+            except ErroDeNegocio as e:
+                avisar('erro', str(e))
+                redirect(URL('carrinho'))
+            redirect(URL('pix', args=[pedido_id]))
+        valores = request.vars
+    else:
+        valores = dict(ultimo_endereco(auth.user_id), tipo_entrega='entrega')
+    return dict(resumo=resumo, valores=valores, erros=erros)
 
 
 @requer_papel('cliente')

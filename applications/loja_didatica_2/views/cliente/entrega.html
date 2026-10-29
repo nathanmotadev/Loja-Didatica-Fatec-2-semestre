@@ -1,0 +1,135 @@
+{{extend 'layout.html'}}
+{{response.title = 'Entrega'}}
+{{
+def _v(c):
+    return valores.get(c) or ''
+def _erro(c):
+    return SPAN(erros[c], _class='erro-campo', _id='erro-' + c) if c in erros else ''
+def _inv(c):
+    return 'aria-invalid="true" aria-describedby="erro-%s"' % c if c in erros else ''
+tipo = _v('tipo_entrega') or 'entrega'
+}}
+<p class="pequeno"><a href="{{=URL('cliente', 'carrinho')}}">Carrinho</a> › Entrega</p>
+<div class="cabecalho-pagina">
+  <div>
+    <h1>Como você quer receber?</h1>
+    <p>Escolha entre receber no seu endereço ou retirar o pedido na loja. Depois você paga com PIX.</p>
+  </div>
+</div>
+
+{{if erros:}}<div class="aviso aviso-erro">Confira os campos destacados abaixo.</div>{{pass}}
+
+<form method="post" action="{{=URL('cliente', 'entrega')}}" class="carrinho" id="form-entrega" novalidate>
+  <input type="hidden" name="_csrf" value="{{=csrf_token()}}">
+  <div class="cartao">
+    <fieldset class="opcoes-entrega">
+      <legend class="sr-only">Forma de recebimento</legend>
+      <label class="opcao-entrega">
+        <input type="radio" name="tipo_entrega" value="entrega" {{='checked' if tipo == 'entrega' else ''}}>
+        <span><strong>Receber no meu endereço</strong>
+          <span class="pequeno texto-2">Frete grátis · até {{=resumo['prazo_dias']}} dias úteis após o pagamento</span></span>
+      </label>
+      <label class="opcao-entrega">
+        <input type="radio" name="tipo_entrega" value="retirada" {{='checked' if tipo == 'retirada' else ''}}>
+        <span><strong>Retirar na loja</strong>
+          <span class="pequeno texto-2">Sem custo · retire assim que o pedido estiver pronto</span></span>
+      </label>
+    </fieldset>
+    {{=_erro('tipo_entrega')}}
+
+    <div id="bloco-endereco" {{='hidden' if tipo == 'retirada' else ''}}>
+      <h2 class="mt-1">Endereço de entrega</h2>
+      <div class="campo-linha">
+        <div class="campo"><label for="cep">CEP</label>
+          <input type="text" id="cep" name="cep" inputmode="numeric" maxlength="9" placeholder="00000-000"
+                 autocomplete="postal-code" value="{{=_v('cep')}}" {{=XML(_inv('cep'))}}>
+          <span class="ajuda" id="cep-ajuda">Preenchemos rua, bairro e cidade pelo CEP.</span>{{=_erro('cep')}}</div>
+        <div class="campo"></div>
+      </div>
+      <div class="campo"><label for="logradouro">Rua / avenida</label>
+        <input type="text" id="logradouro" name="logradouro" maxlength="120" autocomplete="address-line1"
+               value="{{=_v('logradouro')}}" {{=XML(_inv('logradouro'))}}>{{=_erro('logradouro')}}</div>
+      <div class="campo-linha">
+        <div class="campo"><label for="numero">Número</label>
+          <input type="text" id="numero" name="numero" maxlength="10" value="{{=_v('numero')}}" {{=XML(_inv('numero'))}}>{{=_erro('numero')}}</div>
+        <div class="campo"><label for="complemento">Complemento <span class="texto-3">(opcional)</span></label>
+          <input type="text" id="complemento" name="complemento" maxlength="60" autocomplete="address-line2"
+                 placeholder="Apto, bloco…" value="{{=_v('complemento')}}"></div>
+      </div>
+      <div class="campo"><label for="bairro">Bairro</label>
+        <input type="text" id="bairro" name="bairro" maxlength="60" value="{{=_v('bairro')}}" {{=XML(_inv('bairro'))}}>{{=_erro('bairro')}}</div>
+      <div class="campo-linha">
+        <div class="campo"><label for="cidade">Cidade</label>
+          <input type="text" id="cidade" name="cidade" maxlength="60" autocomplete="address-level2"
+                 value="{{=_v('cidade')}}" {{=XML(_inv('cidade'))}}>{{=_erro('cidade')}}</div>
+        <div class="campo"><label for="uf">Estado</label>
+          <select id="uf" name="uf" autocomplete="address-level1" {{=XML(_inv('uf'))}}>
+            <option value="">Escolha…</option>
+            {{for uf in UFS:}}<option value="{{=uf}}" {{='selected' if _v('uf').upper() == uf else ''}}>{{=uf}}</option>{{pass}}
+          </select>{{=_erro('uf')}}</div>
+      </div>
+    </div>
+
+    <div id="bloco-retirada" {{='hidden' if tipo != 'retirada' else ''}}>
+      <h2 class="mt-1">Onde retirar</h2>
+      <p><strong>{{=NOME_LOJA}}</strong><br>{{=ENDERECO_LOJA}}</p>
+      <p class="pequeno texto-2">Horário: {{=HORARIO_RETIRADA}}. Leve um documento com foto e o código do pedido.
+        Acompanhe em <em>Meus pedidos</em>: a situação muda para “Pronto para retirada” quando você já pode buscar.</p>
+    </div>
+  </div>
+
+  <aside class="cartao">
+    <h2>Resumo</h2>
+    {{for i in resumo['itens']:}}
+    <div class="resumo-linha pequeno"><span>{{=i['quantidade']}} × {{=i['nome']}}</span><span>{{=i['subtotal_fmt']}}</span></div>
+    {{pass}}
+    <div class="resumo-linha"><span>Frete</span><span>grátis</span></div>
+    <div class="resumo-linha resumo-total"><span>Total</span><span class="preco">{{=resumo['total_fmt']}}</span></div>
+    <button class="btn btn-primario btn-largo mt-1" type="submit">Confirmar e pagar com PIX</button>
+    <a class="btn btn-discreto btn-largo mt-1" href="{{=URL('cliente', 'carrinho')}}">Voltar ao carrinho</a>
+    <p class="pequeno texto-3 mt-1">O estoque é reservado quando o pedido é criado e devolvido se ele for cancelado.</p>
+  </aside>
+</form>
+
+{{block scripts}}
+<script>
+(function () {
+  var form = document.getElementById('form-entrega');
+  var endereco = document.getElementById('bloco-endereco');
+  var retirada = document.getElementById('bloco-retirada');
+
+  // mostra só o bloco da opção marcada
+  function alternar() {
+    var tipo = form.querySelector('input[name="tipo_entrega"]:checked');
+    var ehRetirada = tipo && tipo.value === 'retirada';
+    endereco.hidden = ehRetirada;
+    retirada.hidden = !ehRetirada;
+  }
+  form.querySelectorAll('input[name="tipo_entrega"]').forEach(function (r) {
+    r.addEventListener('change', alternar);
+  });
+
+  // CEP: máscara 00000-000 e busca do endereço no ViaCEP (se houver internet)
+  var cep = document.getElementById('cep');
+  var ajuda = document.getElementById('cep-ajuda');
+  cep.addEventListener('input', function () {
+    var d = cep.value.replace(/\D/g, '').slice(0, 8);
+    cep.value = d.length > 5 ? d.slice(0, 5) + '-' + d.slice(5) : d;
+    if (d.length === 8) buscarCep(d);
+  });
+  function buscarCep(d) {
+    ajuda.textContent = 'Buscando endereço…';
+    fetch('https://viacep.com.br/ws/' + d + '/json/')
+      .then(function (r) { return r.json(); })
+      .then(function (e) {
+        if (e.erro) { ajuda.textContent = 'CEP não encontrado. Preencha o endereço manualmente.'; return; }
+        [['logradouro', e.logradouro], ['bairro', e.bairro], ['cidade', e.localidade], ['uf', e.uf]]
+          .forEach(function (par) { if (par[1]) document.getElementById(par[0]).value = par[1]; });
+        ajuda.textContent = 'Endereço encontrado. Confira e informe o número.';
+        document.getElementById('numero').focus();
+      })
+      .catch(function () { ajuda.textContent = 'Não foi possível consultar o CEP. Preencha manualmente.'; });
+  }
+})();
+</script>
+{{end}}

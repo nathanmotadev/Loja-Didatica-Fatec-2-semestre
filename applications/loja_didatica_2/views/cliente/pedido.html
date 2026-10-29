@@ -1,12 +1,12 @@
 {{extend 'layout.html'}}
 {{response.title = 'Pedido ' + pedido.codigo}}
-{{etapas = [('aguardando_pagamento', 'Aguardando pagamento'), ('pago', 'Pagamento confirmado'), ('separando', 'Separando o pedido'), ('enviado', 'Entregue à transportadora'), ('em_entrega', 'Em entrega'), ('entregue', 'Entregue')]
+{{etapas = [('aguardando_pagamento', 'Aguardando pagamento'), ('pago', 'Pagamento confirmado')] + [(s, rotulo_etapa(pedido, s)) for s in fluxo_do_pedido(pedido)[1:]]
 indice = dict((s, i) for i, (s, _) in enumerate(etapas)).get(pedido.status, -1)}}
 <p class="pequeno"><a href="{{=URL('cliente', 'pedidos')}}">Meus pedidos</a> › {{=pedido.codigo}}</p>
 <div class="cabecalho-pagina">
   <div><h1>Pedido <span class="mono">{{=pedido.codigo}}</span></h1>
-  <p>Feito em {{=data_br(pedido.data_pedido)}} · rastreio <span class="mono">{{=pedido.codigo_rastreio}}</span></p></div>
-  <span class="etiqueta {{=pedido.status}}" style="font-size:.95rem">{{=rotulo_pedido(pedido.status)}}</span>
+  <p>Feito em {{=data_br(pedido.data_pedido)}}{{if pedido.tipo_entrega != 'retirada':}} · rastreio <span class="mono">{{=pedido.codigo_rastreio}}</span>{{pass}}</p></div>
+  <span class="etiqueta {{=pedido.status}}" style="font-size:.95rem">{{=rotulo_etapa(pedido, pedido.status)}}</span>
 </div>
 
 <div class="grade grade-2">
@@ -27,6 +27,19 @@ indice = dict((s, i) for i, (s, _) in enumerate(etapas)).get(pedido.status, -1)}
       {{if pode_cancelar(pedido):}}<a class="btn btn-perigo" href="{{=URL('cliente', 'cancelar', args=[pedido.id])}}">Cancelar pedido</a>{{pass}}
       <a class="btn btn-secundario" href="{{=URL('cliente', 'reclamacao', args=[pedido.id])}}">{{='Ver reclamação' if reclamacao else 'Abrir reclamação'}}</a>
     </div>
+  </div>
+  <div class="cartao">
+    <h2>{{=TIPO_ENTREGA_ROTULO.get(pedido.tipo_entrega)}}</h2>
+    {{if pedido.tipo_entrega == 'retirada':}}
+    <p><strong>{{=NOME_LOJA}}</strong><br>{{=ENDERECO_LOJA}}</p>
+    <p class="pequeno texto-2">Horário: {{=HORARIO_RETIRADA}}. Leve um documento com foto e o código <span class="mono">{{=pedido.codigo}}</span>.
+      {{if pedido.status == 'pronto_retirada':}}<strong>Seu pedido já está pronto para retirada.</strong>{{pass}}</p>
+    {{elif not pedido.cep:}}
+    <p class="texto-3">Endereço não informado.</p>
+    {{else:}}
+    <p>{{=pedido.logradouro}}, {{=pedido.numero}}{{if pedido.complemento:}} — {{=pedido.complemento}}{{pass}}<br>
+      {{=pedido.bairro}} · {{=pedido.cidade}}/{{=pedido.uf}}<br>CEP {{=pedido.cep}}</p>
+    {{pass}}
   </div>
   <div class="cartao">
     <h2>Itens</h2>
