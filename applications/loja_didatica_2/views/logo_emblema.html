@@ -1,0 +1,30 @@
+<svg class="logo-emblema" viewBox="0 0 560 440" role="img" aria-label="Skateroom Fatec — Roda firme, cabeça leve. São Paulo, desde 2026">
+  <defs>
+    <filter id="logo-gasto" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -14 9.2" result="m"/>
+      <feComposite in="SourceGraphic" in2="m" operator="in"/>
+    </filter>
+    <path id="logo-arco-topo" d="M18 220 A262 182 0 0 1 542 220"/>
+    <path id="logo-arco-base" d="M14 220 A266 190 0 0 0 546 220"/>
+  </defs>
+  <g filter="url(#logo-gasto)">
+    <text class="logo-anton" font-size="22" letter-spacing="5" fill="#123a52" text-anchor="middle"><textPath href="#logo-arco-topo" startOffset="50%">RODA FIRME, CABEÇA LEVE</textPath></text>
+    <text class="logo-anton" font-size="17" letter-spacing="6" fill="#123a52" text-anchor="middle"><textPath href="#logo-arco-base" startOffset="50%">SÃO PAULO · EST. 2026</textPath></text>
+    <ellipse cx="280" cy="220" rx="242" ry="162" fill="none" stroke="#123a52" stroke-width="6"/>
+    <ellipse cx="280" cy="220" rx="232" ry="152" fill="#f1ead2"/>
+    <ellipse cx="280" cy="220" rx="220" ry="140" fill="#e2523a"/>
+    <g transform="rotate(-8 280 190)">
+      <text x="285" y="196" text-anchor="middle" class="logo-lobster" font-size="92" fill="#123a52">Skateroom</text>
+      <text x="280" y="190" text-anchor="middle" class="logo-lobster" font-size="92" fill="#f1ead2">Skateroom</text>
+    </g>
+    <g transform="rotate(-16 280 266)">
+      <circle cx="168" cy="296" r="24" fill="#123a52" stroke="#f1ead2" stroke-width="3"/><circle cx="168" cy="296" r="9" fill="#f1ead2"/>
+      <circle cx="392" cy="296" r="24" fill="#123a52" stroke="#f1ead2" stroke-width="3"/><circle cx="392" cy="296" r="9" fill="#f1ead2"/>
+      <rect x="96" y="238" width="368" height="52" rx="26" fill="#123a52" stroke="#f1ead2" stroke-width="4"/>
+      <rect x="106" y="248" width="348" height="32" rx="16" fill="none" stroke="#e2523a" stroke-width="2"/>
+      <text x="280" y="274" text-anchor="middle" class="logo-anton" font-size="26" letter-spacing="14" fill="#f1ead2">FATEC</text>
+      <circle cx="132" cy="264" r="3.5" fill="#f1ead2"/><circle cx="428" cy="264" r="3.5" fill="#f1ead2"/>
+    </g>
+  </g>
+</svg>

@@ -46,7 +46,7 @@ response.generic_patterns = []          # não expõe views genéricas (.json/.x
 # -----------------------------------------------------------------------------
 # 2. Constantes da loja
 # -----------------------------------------------------------------------------
-NOME_LOJA = 'Loja Didática 2'
+NOME_LOJA = 'Skateroom Fatec'
 
 PAPEIS = ['cliente', 'vendedor', 'operador', 'administrador']
 PAPEL_DESCRICAO = {
