@@ -1,9 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48">
-  <ellipse cx="32" cy="24" rx="29" ry="21" fill="#f1ead2" stroke="#123a52" stroke-width="2.5"/>
-  <ellipse cx="32" cy="24" rx="24" ry="16" fill="#e2523a"/>
-  <g transform="rotate(-16 32 26)">
-    <circle cx="19" cy="33" r="4" fill="#123a52" stroke="#f1ead2" stroke-width="1.2"/>
-    <circle cx="45" cy="33" r="4" fill="#123a52" stroke="#f1ead2" stroke-width="1.2"/>
-    <rect x="10" y="21" width="44" height="9" rx="4.5" fill="#123a52" stroke="#f1ead2" stroke-width="1.2"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#fff"/><rect width="32" height="64" fill="#d62828"/><rect x="32" width="32" height="64" fill="#1d4fb8"/><text x="32" y="45" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="38" text-anchor="middle" fill="#fff">S</text></svg>

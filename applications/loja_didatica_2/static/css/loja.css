@@ -1,33 +1,33 @@
 /* =============================================================================
-   Skateroom Fatec — tema skate (azul-petróleo, coral e papel), responsivo (mobile first)
+   Skateroom Fatec — tema minimalista (branco, vermelho e azul), responsivo (mobile first)
    Uma única folha de estilo: tokens (variáveis), base, componentes e utilidades.
    ============================================================================= */
 
 :root {
-  /* paleta do logo: azul-petróleo (mantém os nomes --azul-*), coral e papel */
-  --azul-950: #0c2433;
-  --azul-900: #123a52;
-  --azul-800: #123a52;
-  --azul-700: #1b5575;
-  --azul-600: #1f6389;
-  --azul-500: #4f9cc4;
-  --azul-300: #a5cbe0;
-  --azul-100: #dcebf3;
-  --azul-50:  #eef5f9;
+  /* paleta do primeiro design: azul (mantém os nomes --azul-*), vermelho (--coral-*) e branco */
+  --azul-950: #0f2a63;
+  --azul-900: #173f94;
+  --azul-800: #1a46a3;
+  --azul-700: #1d4fb8;
+  --azul-600: #1d4fb8;
+  --azul-500: #5b8fe0;
+  --azul-300: #b3caf2;
+  --azul-100: #e3ecfb;
+  --azul-50:  #eef3fc;
 
-  --coral-500: #e2523a;
-  --coral-600: #c9432b;
-  --coral-700: #b8381f;
-  --coral-100: #fbe3dd;
+  --coral-500: #d62828;
+  --coral-600: #c42222;
+  --coral-700: #b01e1e;
+  --coral-100: #fbe1e1;
 
-  /* neutros (papel) */
-  --fundo: #f4f1ea;
-  --superficie: #fbf8f0;
-  --texto: #15232c;
-  --texto-2: #4a5a64;
-  --texto-3: #5f707b;
-  --borda: #d6cfbb;
-  --borda-forte: #123a52;
+  /* neutros (branco) */
+  --fundo: #ffffff;
+  --superficie: #ffffff;
+  --texto: #111111;
+  --texto-2: #444444;
+  --texto-3: #5a5a5a;
+  --borda: #e8e8e6;
+  --borda-forte: #111111;
 
   /* semânticos */
   --ok: #1b7f4c;      --ok-bg: #e3f5ea;
@@ -35,20 +35,23 @@
   --alerta: #9a6700;  --alerta-bg: #fff4d6;
   --info: #1e4fa3;    --info-bg: #dbe7fa;
 
-  --raio: 14px;
-  --raio-p: 10px;
-  --sombra: 0 2px 6px rgba(12, 36, 51, .18), 0 10px 24px rgba(12, 36, 51, .12);
-  --fonte: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --fonte-titulo: "Lobster", "Anton", cursive;
-  --fonte-marca: "Anton", "Impact", system-ui, sans-serif;
+  --raio: 0;
+  --raio-p: 0;
+  --sombra: 0 2px 6px rgba(0, 0, 0, .14), 0 10px 24px rgba(0, 0, 0, .10);
+  --fonte: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-titulo: "Londrina Outline", "Inter", sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   --largura: 1120px;
 }
 
-@font-face { font-family: "Anton"; font-style: normal; font-weight: 400; font-display: swap;
-  src: url("../fonts/anton-latin-400-normal.woff2") format("woff2"); }
-@font-face { font-family: "Lobster"; font-style: normal; font-weight: 400; font-display: swap;
-  src: url("../fonts/lobster-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("../fonts/inter-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("../fonts/inter-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("../fonts/inter-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Londrina Outline"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("../fonts/londrina-outline-latin-400-normal.woff2") format("woff2"); }
 
 /* ---------- base ---------------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -68,8 +71,8 @@ img { max-width: 100%; display: block; }
 a { color: var(--azul-700); }
 a:hover { color: var(--azul-900); }
 h1, h2, h3 { line-height: 1.2; margin: 0 0 .5rem; color: var(--azul-950); }
-h1 { font-family: var(--fonte-titulo); font-weight: 400; color: var(--azul-900); text-shadow: 2px 2px 0 var(--coral-500);
-     font-size: clamp(2rem, 1.5rem + 2vw, 2.8rem); line-height: 1.1; letter-spacing: .01em; }
+h1 { font-weight: 700; color: var(--texto); text-transform: uppercase; letter-spacing: -.01em;
+     font-size: clamp(1.7rem, 1.3rem + 1.6vw, 2.25rem); line-height: 1.1; }
 h2 { font-size: 1.25rem; }
 h3 { font-size: 1.05rem; }
 p { margin: 0 0 1rem; }
@@ -80,39 +83,38 @@ code, .mono { font-family: var(--mono); font-size: .92em; }
 }
 
 .pular {
-  position: absolute; left: -999px; top: 8px; background: var(--azul-900); color: #fff;
+  position: absolute; left: -999px; top: 8px; background: var(--azul-700); color: #fff;
   padding: .5rem 1rem; border-radius: var(--raio-p); z-index: 100;
 }
 .pular:focus { left: 8px; }
 
 /* ---------- cabeçalho e navegação ----------------------------------------- */
 .topo {
-  background: linear-gradient(120deg, #0c2433 0%, #123a52 60%, #1b5575 100%);
-  color: #fff;
-  box-shadow: inset 0 -3px 0 var(--coral-500);
+  background: #fff; color: var(--texto); border-bottom: 1px solid var(--borda);
+  border-top: 8px solid; border-image: linear-gradient(90deg, var(--coral-500) 0 50%, var(--azul-700) 50% 100%) 1;
 }
 .topo-inner {
   max-width: var(--largura); margin: 0 auto; padding: .75rem 1rem;
   display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
 }
 .marca {
-  display: flex; align-items: center; gap: .6rem; color: #fff; text-decoration: none;
-  font-weight: 700; font-size: 1.15rem; letter-spacing: .01em;
+  display: flex; align-items: baseline; gap: .5rem; text-decoration: none; line-height: 1;
 }
-.marca img { height: 38px; width: auto; }
-.marca > span { font-family: var(--fonte-marca); font-weight: 400; font-size: 1.7rem; line-height: 1.05;
-  letter-spacing: .07em; text-transform: uppercase; }
-.marca small { display: block; font-family: var(--fonte); font-weight: 400; font-size: .72rem; opacity: .75;
-  letter-spacing: normal; text-transform: none; }
+.marca > span { font-family: var(--fonte-titulo); font-weight: 400; font-size: 2.1rem; line-height: 1;
+  letter-spacing: .03em; text-transform: uppercase; color: var(--coral-500); }
+.marca > span b { font-family: var(--fonte); font-size: .7rem; font-weight: 600; letter-spacing: .4em; color: var(--azul-700); }
+.marca small { display: block; font-family: var(--fonte); font-weight: 400; font-size: .7rem; color: var(--texto-3);
+  letter-spacing: normal; text-transform: none; margin-top: .2rem; }
 .topo-direita { margin-left: auto; display: flex; align-items: center; gap: .75rem; font-size: .9rem; }
-.topo-direita a { color: #fff; }
+.topo-direita a { color: var(--texto); text-transform: uppercase; letter-spacing: .08em; font-size: .8rem; font-weight: 600; text-decoration: none; }
+.topo-direita a:hover { color: var(--azul-700); }
 .topo-usuario { display: none; }
 .papel {
   display: inline-block; font-size: .7rem; padding: .1rem .5rem; border-radius: 99px;
-  background: rgba(255, 255, 255, .16); color: #fff; margin-left: .25rem; vertical-align: middle;
+  background: var(--azul-50); color: var(--azul-700); margin-left: .25rem; vertical-align: middle;
 }
 .menu-btn {
-  background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, .45);
+  background: transparent; color: var(--texto); border: 1px solid var(--borda-forte);
   border-radius: var(--raio-p); padding: .4rem .7rem; font: inherit; cursor: pointer;
 }
 .nav {
@@ -127,11 +129,12 @@ code, .mono { font-family: var(--mono); font-size: .92em; }
 .nav-grupo:first-child { border-top: none; }
 .nav-rotulo { font-size: .72rem; color: var(--texto-3); padding: .35rem 0 0; }
 .nav a {
-  color: var(--texto-2); text-decoration: none; font-weight: 600; font-size: .92rem;
+  color: var(--texto-2); text-decoration: none; font-weight: 600; font-size: .8rem;
+  text-transform: uppercase; letter-spacing: .08em;
   padding: .55rem 0; border-left: 3px solid transparent;
 }
 .nav a:hover { color: var(--azul-700); }
-.nav a.ativo { color: var(--azul-900); border-left-color: var(--coral-500); padding-left: .5rem; }
+.nav a.ativo { color: var(--texto); border-left-color: var(--coral-500); padding-left: .5rem; }
 .badge {
   display: inline-block; min-width: 1.4em; padding: 0 .4em; border-radius: 99px;
   background: var(--coral-700); color: #fff; font-size: .72rem; font-weight: 700;
@@ -186,14 +189,14 @@ code, .mono { font-family: var(--mono); font-size: .92em; }
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
   padding: .55rem 1rem; border-radius: var(--raio-p); font: inherit; font-weight: 600;
-  font-size: .92rem; text-decoration: none; cursor: pointer; border: 1px solid transparent;
+  font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; cursor: pointer; border: 1px solid transparent;
   transition: background-color .15s, border-color .15s;
   min-height: 2.5rem;
 }
 .btn:disabled, .btn[aria-disabled="true"] { opacity: .55; cursor: not-allowed; }
-.btn-primario { background: var(--coral-600); color: #fff; border: 2px solid var(--azul-900); box-shadow: 2px 2px 0 var(--azul-900); }
-.btn-primario:hover:not(:disabled) { background: var(--coral-700); color: #fff; }
-.btn-secundario { background: var(--superficie); color: var(--azul-800); border-color: var(--borda-forte); }
+.btn-primario { background: var(--azul-700); color: #fff; }
+.btn-primario:hover:not(:disabled) { background: var(--azul-900); color: #fff; }
+.btn-secundario { background: #fff; color: var(--azul-700); border-color: var(--azul-700); }
 .btn-secundario:hover:not(:disabled) { background: var(--azul-50); }
 .btn-perigo { background: var(--erro); color: #fff; }
 .btn-perigo:hover:not(:disabled) { background: #8f1c12; color: #fff; }
@@ -222,37 +225,35 @@ code, .mono { font-family: var(--mono); font-size: .92em; }
   padding: 1rem; text-decoration: none; color: inherit; display: block;
 }
 .numero:hover { border-color: var(--azul-900); color: inherit; }
-.numero b { display: block; font-size: 1.8rem; color: var(--azul-800); font-variant-numeric: tabular-nums; }
+.numero b { display: block; font-size: 1.8rem; color: var(--azul-700); font-variant-numeric: tabular-nums; }
 .numero span { color: var(--texto-2); font-size: .85rem; }
 .numero.atencao b { color: var(--alerta); }
 
 /* produto no catálogo */
 .produto-card {
-  background: var(--superficie); border: 2px solid var(--azul-900); border-radius: var(--raio);
-  overflow: hidden; display: flex; flex-direction: column; box-shadow: 5px 5px 0 var(--azul-900);
-  transition: transform .15s, box-shadow .15s;
+  background: var(--superficie); border: 0; border-radius: 0;
+  overflow: hidden; display: flex; flex-direction: column; gap: .25rem;
 }
-.produto-card:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--azul-900); }
-.produto-card .foto { aspect-ratio: 4 / 3; background: #e6dfcc; display: block; overflow: hidden; }
+.produto-card .foto { aspect-ratio: 4 / 5; background: var(--azul-50); display: block; overflow: hidden; }
 .produto-card .foto img { width: 100%; height: 100%; object-fit: cover; }
-.produto-card .corpo { padding: .9rem 1rem 1rem; display: flex; flex-direction: column; gap: .3rem; flex: 1; }
-.produto-card .nome { font-weight: 600; text-decoration: none; color: var(--texto); }
+.produto-card .corpo { padding: .9rem 0 .5rem; display: flex; flex-direction: column; gap: .3rem; flex: 1; }
+.produto-card .nome { font-weight: 600; text-decoration: none; color: var(--texto); text-transform: uppercase; letter-spacing: .04em; font-size: .9rem; }
 .produto-card .nome:hover { color: var(--azul-700); }
 .produto-card .categoria { font-size: .78rem; color: var(--texto-3); }
 .produto-card .descricao {
   font-size: .85rem; color: var(--texto-2); flex: 1;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-.preco { font-size: 1.25rem; font-weight: 700; color: var(--azul-800); font-variant-numeric: tabular-nums; }
+.preco { font-size: 1.25rem; font-weight: 700; color: var(--azul-700); font-variant-numeric: tabular-nums; }
 .produto-card .rodape-card { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .35rem; }
 .estoque-info { font-size: .8rem; color: var(--texto-2); }
 .estoque-info.baixo { color: var(--alerta); font-weight: 600; }
 .estoque-info.zerado { color: var(--erro); font-weight: 600; }
-.produto-card .comprar { padding: 0 1rem 1rem; }
+.produto-card .comprar { padding: 0 0 1rem; }
 
 /* detalhe do produto */
 .detalhe { display: grid; gap: 1.5rem; grid-template-columns: 1fr; }
-.detalhe .foto-grande { border-radius: var(--raio); overflow: hidden; border: 1px solid var(--borda); background: #e6dfcc; }
+.detalhe .foto-grande { overflow: hidden; background: var(--azul-50); }
 .detalhe .foto-grande img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
 @media (min-width: 760px) { .detalhe { grid-template-columns: 1.1fr 1fr; align-items: start; } }
 
@@ -260,11 +261,13 @@ code, .mono { font-family: var(--mono); font-size: .92em; }
 .barra-busca { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .barra-busca input[type="search"] { flex: 1; min-width: 200px; }
 .chips { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.chips { gap: 1.5rem; border-bottom: 1px solid var(--borda); }
 .chip {
-  border: 1px solid var(--borda-forte); background: var(--superficie); color: var(--texto-2);
-  border-radius: 99px; padding: .3rem .85rem; font: inherit; font-size: .85rem; cursor: pointer;
+  border: 0; border-bottom: 2px solid transparent; background: none; color: var(--texto-3);
+  border-radius: 0; padding: .7rem 0; font: inherit; font-size: .8rem; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
 }
-.chip.ativo { background: var(--azul-900); border-color: var(--azul-900); color: #fff; }
+.chip.ativo { background: none; border-bottom-color: var(--coral-500); color: var(--texto); }
 
 /* ---------- formulários --------------------------------------------------- */
 .campo { margin-bottom: 1rem; }
@@ -277,7 +280,7 @@ input[type="search"], input[type="tel"], select, textarea {
   font: inherit; color: var(--texto); background: var(--superficie);
 }
 input:focus, select:focus, textarea:focus {
-  outline: none; border-color: var(--azul-600); box-shadow: 0 0 0 3px rgba(226, 82, 58, .28);
+  outline: none; border-color: var(--azul-600); box-shadow: 0 0 0 3px rgba(29, 79, 184, .25);
 }
 input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--erro); }
 textarea { min-height: 110px; resize: vertical; }
@@ -428,16 +431,18 @@ textarea { min-height: 110px; resize: vertical; }
 .lista-simples li { margin-bottom: .35rem; }
 
 /* ---- Avaliações de produtos (melhoria 1) ---- */
-.estrelas { color: var(--coral-700); letter-spacing: 2px; font-size: 1.1rem; }
+.estrelas { color: var(--coral-500); letter-spacing: 2px; font-size: 1.1rem; }
 .media-nota { margin: .25rem 0 1rem; }
 .form-avaliacao { display: grid; gap: .5rem; max-width: 520px; margin: 1rem 0; padding: 1rem;
                   border: 1px solid var(--azul-100); border-radius: 8px; }
 .form-avaliacao textarea, .form-avaliacao select { width: 100%; }
 .avaliacao-item { border-top: 1px solid var(--azul-100); padding: .75rem 0; }
 
-/* ---- Identidade visual Skateroom Fatec (logo oval) ---- */
-.logo-anton { font-family: var(--fonte-marca); }
-.logo-lobster { font-family: "Lobster", cursive; }
-.logo-emblema { display: block; width: 100%; height: auto; }
-.hero-logo { max-width: 300px; margin: 0 auto 1rem; }
-.logo-cartao { max-width: 240px; margin: 0 auto 1rem; }
+/* ---- Identidade visual Skateroom Fatec (título grande) ---- */
+.titulo-marca { text-align: center; margin: 0 auto 1.5rem; line-height: .95; }
+.titulo-marca .t1 { display: block; font-family: var(--fonte-titulo); font-weight: 400; text-transform: uppercase;
+  letter-spacing: .02em; color: var(--coral-500); font-size: clamp(3.5rem, 2rem + 10vw, 9rem); }
+.titulo-marca .t2 { display: block; font-family: var(--fonte-titulo); font-weight: 400; text-transform: uppercase;
+  letter-spacing: .5em; color: var(--azul-700); font-size: clamp(1.4rem, 1rem + 2vw, 2.25rem); margin-top: .4rem; padding-left: .5em; }
+.titulo-marca.pequeno-t .t1 { font-size: clamp(2.8rem, 2rem + 5vw, 4.5rem); }
+.titulo-marca.pequeno-t .t2 { font-size: 1.3rem; }
